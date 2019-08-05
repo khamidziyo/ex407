@@ -1,0 +1,26 @@
+---
+- name: Use Archiving
+  hosts: database
+  become: yes
+  tasks:
+    - name: Check if the directory is exist
+      stat:
+        path: /mnt/mysql_backups/
+      register: backup_directory_status
+    - name: Create directory when not exist
+      file:
+        path: /mnt/mysql_backups/
+        state: directory
+        mode: 0775
+        owner: root
+        group: root
+      when: backup_directory_status.stat.exists == false
+    - name: Copy the content
+      copy:
+        content: "dev,test,qa,prod"
+        dest: /mnt/mysql_backups/database_list.txt
+    - name: Create archive
+      archive:
+        path: /mnt/mysql_backups/database_list.txt
+        dest: /mnt/mysql_backups/archive.gz
+        format: gz

@@ -1,0 +1,32 @@
+---
+- name: Change SSH configuration
+  hosts: all
+  become: yes
+  tasks:
+    - name: Change default banner path
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^Banner'
+        line: 'Banner /etc/motd'
+    - name: X11 Forwarding is disabled
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^X11Forwarding'
+        line: 'X11Forwarding no'
+    - name: MaxAuthTries is set to 3
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#MaxAuthTries'
+        line: 'MaxAuthTries 3'
+    - name: Restart the sssd service
+      service:
+        name: sshd
+        state: restarted
+        enabled: yes
+    - name: Check the Configuration
+      shell: "grep MaxAuthTries /etc/ssh/sshd_config; grep X11Forwarding /etc/ssh/sshd_config; grep Banner /etc/ssh/sshd_config"
+      register: check_result
+    - name: Results
+      debug:
+        msg: "{{ check_result.stdout }}"
+

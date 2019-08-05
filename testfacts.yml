@@ -1,0 +1,7 @@
+---
+- name: test facts
+  hosts: database
+  become: yes
+  tasks:
+    - name: Use ansible local facts
+      debug: var=ansible_local.custom.sample_exam

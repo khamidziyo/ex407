@@ -1,0 +1,15 @@
+---
+- name: Test
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: test
+      debug:
+        msg: Bu proxy servers
+      when: "'proxy' in group_names"
+    - debug:
+        msg: Bu webservers servers
+      when: "'webservers' in group_names"
+    - debug:
+        msg: Bu database servers
+      when: "'database' in group_names"

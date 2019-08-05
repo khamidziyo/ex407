@@ -1,0 +1,8 @@
+---
+- name: Install mysql role
+  hosts: database
+  become: yes
+  vars_files:
+    - secret.yml
+  roles:
+    - sample-mysql

@@ -1,0 +1,12 @@
+---
+- name:  Create and Use Templates to Create Customised Configuration Files
+  hosts: database
+  become: yes
+  tasks:
+    - name: Create server list
+      template:
+        src: ./server_list.j2
+        dest:  /etc/server_list.txt
+        owner: cloud_user
+        mode: '0600'
+        setype: net_conf_t

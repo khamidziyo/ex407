@@ -1,0 +1,35 @@
+---
+- name: Create users
+  hosts: all
+  become: yes
+  vars_files:
+      - ./users_list.yml
+      - ./secret.yml
+  tasks:
+    - name: Ensure group is exist
+      group:
+        name: wheel
+        state: present
+    - name: Create users
+      user:
+        name: "{{ item.username }}"
+        group: wheel
+        password: "{{ user_password | password_hash('sha512') }}"
+        shell: /bin/bash
+        update_password: on_create
+      with_items: "{{ users }}"
+      when:
+        - ansible_fqdn in groups['webservers']
+        - "item.uid|string|first == '1'"
+    - name: Create users in database
+      user:
+        name: "{{ item.username }}"
+        group: wheel
+        password:  "{{ user_password | password_hash('sha512') }}"
+        shell: /bin/bash
+        uid: "{{ item.uid }}"
+        update_password: on_create
+      with_items: "{{ users }}"
+      when:
+        -  ansible_fqdn in groups['database']
+        - "item.uid|string|first == '2'"

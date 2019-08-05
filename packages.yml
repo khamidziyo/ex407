@@ -1,0 +1,20 @@
+---
+- name: Install packages
+  hosts: all
+  become: yes
+  tasks:
+    - name: Installs tcpdump and mailx packages on hosts in the proxy host groups
+      yum:
+        name:
+          - tcpdump
+          - mailx
+        state: latest
+      when: inventory_hostname in groups['proxy']
+
+    - name: Installs lsof and mailx and packages on hosts in the database host groups
+      yum:
+        name:
+          - lsof
+          - mailx
+        state: latest
+      when: inventory_hostname in groups['database']

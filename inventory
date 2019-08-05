@@ -1,0 +1,10 @@
+[proxy]
+77726771c.mylabserver.com
+[webservers]
+77726772c.mylabserver.com
+77726773c.mylabserver.com
+[database]
+77726774c.mylabserver.com
+
+[prod:children]
+database

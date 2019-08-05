@@ -1,0 +1,31 @@
+---
+- name: Configure HAPROXY
+  hosts: proxy
+  become: yes
+  roles:
+    - geerlingguy.haproxy
+  vars:
+    haproxy_frontend_port: 80
+    haproxy_frontend_mode: 'http'
+    haproxy_backend_balance_method: 'roundrobin'
+    haproxy_backend_servers:
+      - name: app1
+        address: 54.153.48.114:80
+      - name: app2
+        address: 18.144.27.107:80
+  tasks:
+    - name: Ensure firewalld and its dependencies are installed
+      yum:
+        name: firewalld
+        state: latest
+    - name: Ensure firewalld is running
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+    - name: Ensure firewalld is allowing to the traffic
+      firewalld:
+        port: 80/tcp
+        permanent: yes
+        immediate: yes
+        state: enabled

@@ -1,0 +1,74 @@
+---
+- name: Ensure partition is created
+  parted:
+    device: /dev/nvme1n1
+    number: 1
+    state: present
+    part_end: 800MiB
+    flags: [ lvm ]
+- name: Ensure logical volume is exist
+  lvg:
+    vg: vg_database
+    pvs: /dev/nvme1n1p1
+- name: Ensure logical volume is created
+  lvol:
+    vg: vg_database
+    lv: lv_mysql
+    size: 512
+- name: Create filesystem
+  filesystem:
+    fstype: xfs
+    dev: /dev/vg_database/lv_mysql
+- name: Ensure mountpoint is created
+  file:
+    path: /mnt/mysql_backups
+    state: directory
+    mode: 0775
+- name: Mount the lvm
+  mount:
+    path: /mnt/mysql_backups
+    src: /dev/vg_database/lv_mysql
+    fstype: xfs
+    state: mounted
+
+- name: Ensure the mysql-community-server is installed
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - firewalld
+    - mysql-community-server
+- name: Ensure Firewall is running
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+- name: Firewall is configured to allow all incoming traffic on MySQL port TCP 3306
+  firewalld:
+    port: 3306/tcp
+    permanent: yes
+    immediate: yes
+    state: enabled
+#- name: MySQL root user password
+#  mysql_user:
+#    name: root
+#    password: "{{ database_password }}"
+#    login_unix_socket: yes
+#    state: present
+
+- name: Ensure mysqld service is  started and enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - mysqld
+    - firewalld
+- name: MySQL server configuration
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+

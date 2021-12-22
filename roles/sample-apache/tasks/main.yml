@@ -1,19 +1,18 @@
 ---
 - name: Install all the packages
   yum:
-    name: "{{ item }}"
+    name:
+      - httpd
+      - mod_ssl
+      - php
+      - firewalld
     state: latest
-  loop:
-    - httpd
-    - mod_ssl
-    - php
-    - firewalld
 - name: Ensure Apache and firewalld running
   service:
     name: "{{ item }}"
     state: started
     enabled: yes
-  loop:
+  with_items:
     - httpd
     - firewalld
 - name: firewall is allowing traffic
@@ -22,7 +21,7 @@
     permanent: yes
     immediate: yes
     state: enabled
-  loop:
+  with_items:
     - "80/tcp"
     - "443/tcp"
 - name: Index content
